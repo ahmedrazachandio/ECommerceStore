@@ -9,37 +9,150 @@ const port = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
+let products = [];
 
-// app.get('/', (req, res) => {
-//     console.log("request ip:",req.ip);
-//   res.send('Hello World' + new Date().toDateString())
-// });
-app.get("/weather", (req, res) => {
-  // console.log("request ip:", req.ip);
+// data add krna ki api start
+app.post('/product', (req, res) => {
+
+  const body = req.body;
+
+  if ( // validation
+      !body.name
+      || !body.price
+      || !body.description
+  ) {
+      res.status(400).send({
+          message: "required parameters missing",
+      });
+      return;
+  }
+
+  console.log(body.name)
+  console.log(body.price)
+  console.log(body.description)
+
+  products.push({
+      id: `${new Date().getTime()}`,
+      name: body.name,
+      price: body.price,
+      description: body.description
+  });
+
   res.send({
-    city: "Karachi",
-    text: "Clear",
-    tempC: 22,
-    tempF: 71,
-    ftempC: 20,
-    ftempF: 68,
-    humidity: 83,
-    visibility: "6KM",
-    windKPH: 6.8,
-    windMPH: 4.3,
+      message: "product added successfully"
   });
 });
-app.get("/quizapp", (req, res) => {
-  // console.log("request ip:", req.ip);
-  res.send({
-    que: "what is your current Prime Minister",
-    option1: "Imran Khan",
-    option2: "Bilawal Bhutto",
-    option3: "Shahbaz Shareef",
-    ans: "Shahbaz Shareef",
-    
-  });
+//data add krna ki api end
+// data view krna ki api start
+app.get('/products', (req, res) => {
+    res.send({
+        message: "got all products successfully",
+        data: products
+    })
 });
+// data view krna ki api end
+
+// single data view krna ki api start
+app.get('/product/:id', (req, res) => {
+
+  const id = req.params.id;
+
+  let isFound = false;
+  for (let i = 0; i < products.length; i++) {
+
+      if (products[i].id === id) {
+          res.send({
+              message: `get product by id: ${products[i].id} success`,
+              data: products[i]
+          });
+
+          isFound = true
+          break;
+      }
+  }
+  if (isFound === false) {
+      res.status(404)
+      res.send({
+          message: "product not found"
+      });
+  }
+  return;
+})
+// single data view krna ki api end
+
+
+// api data delete krna ki api start
+app.delete('/product/:id', (req, res) => {
+  const id = req.params.id;
+
+  let isFound = false;
+  for (let i = 0; i < products.length; i++) {
+      if (products[i].id === id) {
+          products.splice(i, 1);
+          res.send({
+              message: "product deleted successfully"
+          });
+          isFound = true
+          break;
+      }
+  }
+  if (isFound === false) {
+      res.status(404)
+      res.send({
+          message: "delete fail: product not found"
+      });
+  }
+})
+// api data delete krna ki api end
+
+
+// api data edit krna ki api start
+app.put('/product/:id', (req, res) => {
+
+  const body = req.body;
+  const id = req.params.id;
+
+  if ( // validation
+      !body.name
+      || !body.price
+      || !body.description
+  ) {
+      res.status(400).send({
+          message: "required parameters missing"
+      });
+      return;
+  }
+
+  console.log(body.name)
+  console.log(body.price)
+  console.log(body.description)
+
+  let isFound = false;
+  for (let i = 0; i < products.length; i++) {
+      if (products[i].id === id) {
+
+          products[i].name = body.name;
+          products[i].price = body.price;
+          products[i].description = body.description;
+
+          res.send({
+              message: "product modified successfully"
+          });
+          isFound = true
+          break;
+      }
+  }
+  if (!isFound) {
+      res.status(404)
+      res.send({
+          message: "edit fail: product not found"
+      });
+  }
+  res.send({
+      message: "product added successfully"
+  });
+})
+// api data edit krna ki api end
 
 
 
