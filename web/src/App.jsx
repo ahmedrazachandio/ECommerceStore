@@ -1,9 +1,12 @@
 import logo from "./logo.svg";
 import "./App.css";
+import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
+import "../node_modules/bootstrap/dist/js/bootstrap.min.js";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import Navbar from "./components/Navbar";
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -11,21 +14,12 @@ function App() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
 
-  const getAllProducts = async () => {
-    try {
-      const response = await axios.get(`http://localhost:5001/products`);
-      console.log("response: ", response.data);
-
-      setProducts(response.data.data);
-    } catch (error) {
-      console.log("error in getting all products", error);
-    }
-  };
+ 
 
   const deleteProduct = async (id) => {
     try {
       const response = await axios.delete(
-        `http://localhost:5001/product/${id}`
+        `http://localhost:3001/product/${id}`
       );
       console.log("response: ", response.data);
 
@@ -45,6 +39,16 @@ function App() {
   };
 
   useEffect(() => {
+    const getAllProducts = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3001/products`);
+        console.log("response: ", response.data);
+  
+        setProducts(response.data.data);
+      } catch (error) {
+        console.log("error in getting all products", error);
+      }
+    };
     getAllProducts();
   }, [loadProduct]);
 
@@ -76,7 +80,7 @@ function App() {
       console.log("values: ", values);
 
       axios
-        .post(`http://localhost:5001/product`, {
+        .post(`http://localhost:3001/product`, {
           name: values.productName,
           price: values.productPrice,
           description: values.productDescription,
@@ -118,7 +122,7 @@ function App() {
       console.log("values: ", values);
 
       axios
-        .put(`http://localhost:5001/product/${editingProduct.id}`, {
+        .put(`http://localhost:3001/product/${editingProduct.id}`, {
           name: values.productName,
           price: values.productPrice,
           description: values.productDescription,
@@ -126,6 +130,8 @@ function App() {
         .then((response) => {
           console.log("response: ", response.data);
           setLoadProduct(!loadProduct);
+          setIsEditMode(!isEditMode);
+
         })
         .catch((err) => {
           console.log("error: ", err);
@@ -135,6 +141,7 @@ function App() {
 
   return (
     <div>
+      <Navbar />
       <form onSubmit={myFormik.handleSubmit}>
         <input
           id="productName"
@@ -182,6 +189,7 @@ function App() {
 
       <div>
         {products.map((eachProduct, i) => (
+          // all product rander code
           <div
             key={eachProduct.id}
             style={{
